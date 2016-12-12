@@ -152,9 +152,8 @@ float jumpSpeed = 0.06;
 float gravity = 0.004;
 float heightLimit = 8.0;
 float posYOffset = 0.2;
-
-float backgrundColor[4] = {0.0f,0.0f,0.0f,1.0f};
-
+//float backgrundColor[4] = {0.0f,0.0f,0.0f,1.0f};
+float backgrundColor[4] = {0.0f,206.0f,209.0f,1.0f};
 C3DObject cObj;
 
 //CModelAl modelAL;
@@ -228,6 +227,7 @@ Atualiza a posição e orientação da camera
 */
 void updateCam() {
 
+
 	gluLookAt(posX,posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)),posZ,
 		posX + sin(roty*PI/180),posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180),posZ -cos(roty*PI/180),
 		0.0,1.0,0.0);
@@ -253,8 +253,8 @@ void initLight() {
 	GLfloat light_ambient[] = { backgrundColor[0], backgrundColor[1], backgrundColor[2], backgrundColor[3] };
 	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-	//GLfloat light_position1[] = {0.0, 0.0, 0.0, 1.0 };
-	GLfloat light_position1[] = {0.0, 10.0, 0.0, 1.0 };
+	GLfloat light_position1[] = {0.0, 0.0, 0.0, 1.0 };
+	//GLfloat light_position1[] = {0.0, 10.0, 0.0, 1.0 };
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
@@ -376,7 +376,7 @@ void initTexture(void)
 {
     printf ("\nLoading texture..\n");
     // Load a texture object (256x256 true color)
-    bits = LoadDIBitmap("tiledbronze.bmp", &info);
+    bits = LoadDIBitmap("grass.bmp", &info);
     if (bits == (GLubyte *)0) {
 		printf ("Error loading texture!\n\n");
 		return;
