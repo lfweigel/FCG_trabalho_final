@@ -175,7 +175,7 @@ void loadHeightmap(const char* bitmap_file) {
     for (int i=0; i<loaded_bitmap->h; i++){
         current_row.clear();
         for (int j=0; j<loaded_bitmap->w; j++){
-            Uint32 pixel = ((Uint32*)loaded_bitmap->pixels)[i*loaded_bitmap->pitch/4 + i];
+            Uint32 pixel = ((Uint32*)loaded_bitmap->pixels)[i*loaded_bitmap->pitch/4 + j];
             Uint8 r, g, b;
             SDL_GetRGB(pixel, loaded_bitmap->format, &r, &g, &b);
             current_row.push_back((float)(r+g+b/3)/255.0);
@@ -288,7 +288,7 @@ void mainInit() {
 
     initSound();
 
-    //initTexture();
+    initTexture();
 
 	initModel();
 
@@ -475,6 +475,9 @@ void renderFloor() {
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f((i+1) * (float)planeSize/xQuads, heights[i+1][j+1], (j+1) * (float)planeSize/zQuads);
                 */
+                glTexCoord2f(1.0f, 1.0f);  // coords for the texture
+                glNormal3f(0.0f,1.0f,0.0f);
+                glVertex3f(i * (float)planeSize/xQuads, heights[i][j]*HEIGHT_CONSTANT, j * (float)planeSize/zQuads);
 
                 glTexCoord2f(1.0f, 0.0f);   // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
@@ -488,9 +491,6 @@ void renderFloor() {
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f((i+1) * (float)planeSize/xQuads, heights[i+1][j]*HEIGHT_CONSTANT, j * (float)planeSize/zQuads);
 
-                glTexCoord2f(1.0f, 1.0f);  // coords for the texture
-                glNormal3f(0.0f,1.0f,0.0f);
-                glVertex3f(i * (float)planeSize/xQuads, heights[i][j]*HEIGHT_CONSTANT, j * (float)planeSize/zQuads);
 
 
             glEnd();
@@ -519,7 +519,7 @@ void renderScene() {
 	*/
 
     // sets the bmp file already loaded to the OpenGL parameters
-    //setTextureToOpengl();
+    setTextureToOpengl();
 
 	renderFloor();
 	//renderHeightmap(0.1,0.4);
