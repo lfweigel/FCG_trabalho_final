@@ -1,0 +1,9 @@
+Initializing OpenAl 
+init() - No errors yet.
+init - no errors after alGenSources
+Sound ok! 
+
+Loading models.. 
+Models ok. 
+ 
+ 
