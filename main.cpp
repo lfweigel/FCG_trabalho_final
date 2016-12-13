@@ -42,7 +42,13 @@
 #define SMOOTH_MATERIAL 1
 #define SMOOTH_MATERIAL_TEXTURE 2
 
-#define HEIGHT_CONSTANT 7
+#define HEIGHT_CONSTANT 20
+//tamanho em quads do terreno. significa que só vai usar (SIZE_X)x(Size_Z) pixels do bitmal
+#define SIZE_X 300
+#define SIZE_Z 300
+
+//current position on the bitmap to calculate correct y-position of the player
+int x_pixel, z_pixel;
 
 void mainInit();
 void initSound();
@@ -103,7 +109,7 @@ float speedZ = 0.0f;
 
 float posX = 0.0f;
 float posY = 0.0f;
-float posZ = 2.0f;
+float posZ = 0.0f;
 
 /*
 variavel auxiliar pra dar variação na altura do ponto de vista ao andar.
@@ -112,7 +118,7 @@ float headPosAux = 0.0f;
 
 float maxSpeed = 0.25f;
 
-float planeSize = 40.0f;
+float planeSize = 100.0f;
 
 // more sound stuff (position, speed and orientation of the listener)
 ALfloat listenerPos[]={0.0,0.0,4.0};
@@ -225,10 +231,12 @@ void setWindow() {
 Atualiza a posição e orientação da camera
 */
 void updateCam() {
-/*
-    heightLimit = heights[(int)(255*posX/planeSize)][(int)(255*posZ/planeSize)]*HEIGHT_CONSTANT;
-    printf("%f %f %f --- %f\n", posX, posY, posZ, heightLimit);
-*/
+
+    x_pixel = (int)(SIZE_X*(((planeSize/2)+posX)/planeSize));
+    z_pixel = (int)(SIZE_Z*(((planeSize/2)+posZ)/planeSize));
+    heightLimit = heights[x_pixel][z_pixel]*HEIGHT_CONSTANT;
+    printf("%f %f %f --- %d %d ----- %f\n", posX, posY, posZ, x_pixel, z_pixel, heightLimit);
+
 	gluLookAt(posX,posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)),posZ,
 		posX + sin(roty*PI/180),posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180),posZ -cos(roty*PI/180),
 		0.0,1.0,0.0);
@@ -450,8 +458,8 @@ void renderFloor() {
 	float textureScaleX = 10.0;
 	float textureScaleY = 10.0;
     glColor4f(1.0f,1.0f,1.0f,1.0f);
-    int xQuads = 255;
-    int zQuads = 255;
+    int xQuads = SIZE_X;
+    int zQuads = SIZE_Z;
     for (int i = 0; i < xQuads; i++) {
         for (int j = 0; j < zQuads; j++) {
               //glBegin(GL_TRIANGLE_STRIP);
