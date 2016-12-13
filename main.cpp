@@ -228,11 +228,35 @@ void setWindow() {
 Atualiza a posição e orientação da camera
 */
 void updateCam() {
+    float x_pixel_float = (SIZE_X*(((planeSize/2)+posX)/planeSize));
+    float z_pixel_float = (SIZE_Z*(((planeSize/2)+posZ)/planeSize));
+    x_pixel = (int) x_pixel_float;
+    z_pixel = (int) z_pixel_float;
+    float prev_pixel_influence_x, cur_pixel_influence_x, next_pixel_influence_x, prev_pixel_influence_z, cur_pixel_influence_z, next_pixel_influence_z;
+    if ((x_pixel_float - x_pixel) >= 0.5) {
+        prev_pixel_influence_x = 0;
+        next_pixel_influence_x = x_pixel_float - x_pixel;
+        cur_pixel_influence_x = 1 - next_pixel_influence_x;
+    } else {
+        next_pixel_influence_x = 0;
+        cur_pixel_influence_x = x_pixel_float - x_pixel;
+        prev_pixel_influence_x = 1 - cur_pixel_influence_x;
+    }
 
-    x_pixel = (int)(SIZE_X*(((planeSize/2)+posX)/planeSize));
-    z_pixel = (int)(SIZE_Z*(((planeSize/2)+posZ)/planeSize));
-    heightLimit = heights[x_pixel][z_pixel]*HEIGHT_CONSTANT;
-    printf("%f %f %f --- %d %d ----- %f\n", posX, posY, posZ, x_pixel, z_pixel, heightLimit);
+    if ((z_pixel_float - z_pixel) >= 0.5) {
+        prev_pixel_influence_z = 0;
+        next_pixel_influence_z = z_pixel_float - z_pixel;
+        cur_pixel_influence_z = 1 - next_pixel_influence_z;
+    } else {
+        next_pixel_influence_z = 0;
+        cur_pixel_influence_z = z_pixel_float - z_pixel;
+        prev_pixel_influence_z = 1 - cur_pixel_influence_z;
+    }
+
+    heightLimit = (heights[x_pixel-1][z_pixel]*prev_pixel_influence_x*HEIGHT_CONSTANT + heights[x_pixel][z_pixel]* cur_pixel_influence_x*HEIGHT_CONSTANT + heights[x_pixel+1][z_pixel]*next_pixel_influence_x*HEIGHT_CONSTANT
+                    + heights[x_pixel][z_pixel-1]*prev_pixel_influence_z*HEIGHT_CONSTANT + heights[x_pixel][z_pixel]*cur_pixel_influence_z*HEIGHT_CONSTANT + heights[x_pixel][z_pixel+1]*next_pixel_influence_z*HEIGHT_CONSTANT)/2;
+
+    printf("%d %d - %f %f--- %f %f %f --- %f %f %f -- %f \n", x_pixel, z_pixel, x_pixel_float, z_pixel_float, prev_pixel_influence_x, cur_pixel_influence_x,next_pixel_influence_x, prev_pixel_influence_z, cur_pixel_influence_z, next_pixel_influence_z, heightLimit);
 
 	gluLookAt(posX,posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)),posZ,
 		posX + sin(roty*PI/180),posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180),posZ -cos(roty*PI/180),
