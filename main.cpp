@@ -76,13 +76,13 @@ void setTextureToOpengl();
 /**
 Screen dimensions
 */
-int windowWidth = 600;
-int windowHeight = 480;
+int windowWidth = 1000;
+int windowHeight = 800;
 
 /**
 Screen position
 */
-int windowXPos = 100;
+int windowXPos = 500;
 int windowYPos = 150;
 
 int mainWindowId = 0;
