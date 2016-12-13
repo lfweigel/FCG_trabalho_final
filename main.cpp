@@ -1,3 +1,7 @@
+
+#define GLUT_NO_LIB_PRAGMA
+#define GLUT_NO_WARNING_DISABLE
+
 #include <windows.h>
 
 #include <stdio.h>
@@ -20,10 +24,9 @@
 //handle generic obj models
 #include "3DObject.h"
 
-#define SDL_MAIN_HANDLED
-
 //lib pra fazer as treta do heightmap
 #include <SDL/SDL.h>
+
 
 #pragma comment(lib, "OpenAL32.lib")
 #pragma comment(lib, "alut.lib")
@@ -184,15 +187,11 @@ void loadHeightmap(const char* bitmap_file) {
 }
 /*
 void renderHeightmap(float size, float height){
-
     glShadeModel(GL_SMOOTH);
 	glEnable(type);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
 	glPushMatrix();
-
     glTranslatef(-(float)planeSize/2.0f, 0.0f, -(float)planeSize/2.0f);
-
     for (int i=0; i<heights.size()-1;i++) {
         for (int j=0; j<heights[i].size()-1; j++) {
             glBegin(GL_TRIANGLE_STRIP);
@@ -410,7 +409,6 @@ void initTexture(void)
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
     glTexImage2D(type, 0, 4, info->bmiHeader.biWidth, info->bmiHeader.biHeight,
                   0, GL_RGBA, GL_UNSIGNED_BYTE, rgba );
     */
@@ -464,15 +462,12 @@ void renderFloor() {
                 glTexCoord2f(1.0f, 0.0f);   // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f(i*(float)planeSize/xQuads, heights[i][j], j*(float)planeSize/zQuads);
-
                 glTexCoord2f(0.0f, 0.0f);  // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f((i+1)*(float)planeSize/xQuads, heights[i+1][j], j*(float)planeSize/zQuads);
-
                 glTexCoord2f(0.0f, 1.0f);  // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f(i* (float)planeSize/xQuads, heights[i][j+1], (j+1) * (float)planeSize/zQuads);
-
                 glTexCoord2f(1.0f, 1.0f);  // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f((i+1) * (float)planeSize/xQuads, heights[i+1][j+1], (j+1) * (float)planeSize/zQuads);
