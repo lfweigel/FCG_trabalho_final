@@ -716,6 +716,17 @@ void updateState() {
 		}
 	}
 
+	if(posX < - planeSize/2)
+        posX = -planeSize/2;
+    else if (posX > planeSize/2)
+        posX = planeSize/2;
+
+    if(posZ < - planeSize/2)
+        posZ = -planeSize/2;
+    else if (posZ > planeSize/2)
+        posZ = planeSize/2;
+
+
 }
 
 /**
