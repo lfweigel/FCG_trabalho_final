@@ -638,7 +638,7 @@ void renderScene() {
 }
 
 void renderMinimap() {
-
+        glClear(GL_DEPTH_BUFFER_BIT);
         setViewport(windowWidth*0.8, windowWidth, windowHeight*0.8 , windowHeight);
         glLoadIdentity();
         gluLookAt(posX, 40 ,posZ,
