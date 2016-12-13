@@ -1,0 +1,23 @@
+Initializing OpenAl 
+init() - No errors yet.
+init - no errors after alGenSources
+Sound ok! 
+
+
+Loading texture..
+Textura 1
+Textures ok.
+
+Object generated at -3.229469 12.620625 
+Object generated at 0.757469 13.233436 
+Object generated at 4.743187 13.847468 
+Object generated at 8.730124 14.460280 
+Object generated at 12.715842 15.074312 
+Object generated at 16.702780 15.687124 
+Object generated at -19.311502 16.299936 
+Object generated at -15.325785 16.913969 
+Object generated at -11.338847 17.526779 
+Object generated at -7.353130 18.140812 
+ball died
+ball died
+ball died

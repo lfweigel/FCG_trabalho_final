@@ -23,8 +23,8 @@
 #include <SDL/SDL.h>
 
 // sound stuff
-#define NUM_BUFFERS 1
-#define NUM_SOURCES 1
+#define NUM_BUFFERS 2
+#define NUM_SOURCES 2
 #define NUM_ENVIRONMENTS 1
 // texture stuff
 #define SMOOTH 0
@@ -43,8 +43,10 @@ int x_pixel, z_pixel;
 // other stuff
 #define PI 3.14159265
 
-//object speed
-#define OBJECT_SPEED 0.1
+//object stuff
+#define OBJECT_SPEED 0.05
+#define COLLISION_THRESHOLD 1.0
+#define MAX_OBJECTS 10
 
 
 void mainInit();
@@ -127,6 +129,9 @@ ALfloat listenerOri[]={0.0,0.0,1.0,
 ALfloat source0Pos[]={ -2.0, 0.0, 0.0};
 ALfloat source0Vel[]={ 0.0, 0.0, 0.0};
 
+ALfloat source1Pos[]={ -2.0, 0.0, 0.0};
+ALfloat source1Vel[]={ 0.0, 0.0, 0.0};
+
 // buffers for openal stuff
 ALuint  buffer[NUM_BUFFERS];
 ALuint  source[NUM_SOURCES];
@@ -156,18 +161,17 @@ bool running = false;
 bool jumping = false;
 float jumpSpeed = 0.06;
 float gravity = 0.004;
-float heightLimit = 8.0;
+float heightLimit;
 float posYOffset = 0.2;
-//float backgrundColor[4] = {0.0f,0.0f,0.0f,1.0f};
 float backgrundColor[4] = {0.0f,206.0f,209.0f,1.0f};
 C3DObject cObj;
+
+int objects_destroyed = 0;
 
 //CModelAl modelAL;
 
 //matriz de heights extraidos do heightmap
 std::vector<std::vector<float> > heights;
-
-//Armazena os valores do heightmap na matriz declarada acima
 
 
 ///////////////////////refatoracao pls
@@ -176,8 +180,10 @@ class Object{
 public:
     float x_pos, z_pos;
     C3DObject cObj;
+    bool alive;
 
     void initModel(const char* model) {
+    this->alive = 1;
 	cObj.Init();
 	cObj.Load(model);
     }
@@ -191,9 +197,10 @@ public:
         }
 
     void move_and_draw(int seed){
+
         srand(time(NULL) + seed);
-        int side = rand()%5;
-        switch (side){
+        int movement = rand()%5;
+        switch (movement){
             case 0: this->x_pos -= OBJECT_SPEED;
             break;
             case 1: this->x_pos += OBJECT_SPEED;
@@ -206,15 +213,15 @@ public:
             default: break;
         }
 
-        if (this->x_pos < -planeSize/2)
-            this->x_pos = -planeSize/2;
-        else if (this->x_pos > planeSize/2)
-            this->x_pos = planeSize/2;
+        if (this->x_pos < -planeSize/2.0f)
+            this->x_pos = -planeSize/2.0f;
+        else if (this->x_pos > planeSize/2.0f)
+            this->x_pos = planeSize/2.0f;
 
-        if (this->z_pos < -planeSize/2)
-            this->z_pos = -planeSize/2;
-        else if (this->z_pos > planeSize/2)
-            this->z_pos = planeSize/2;
+        if (this->z_pos < -planeSize/2.0f)
+            this->z_pos = -planeSize/2.0f;
+        else if (this->z_pos > planeSize/2.0f)
+            this->z_pos = planeSize/2.0f;
 
         glPushMatrix();
         float x_pixel_float = (SIZE_X*(((planeSize/2)+x_pos)/planeSize));
@@ -226,9 +233,27 @@ public:
         glPopMatrix();
     }
 
+    void checkColisionWithPlayer(){
+        if (std::abs((this->x_pos - posX)) < COLLISION_THRESHOLD)
+            if (std::abs((this->z_pos - posZ)) < COLLISION_THRESHOLD) {
+                this->alive = 0;
+                printf("ball died\n");
+                objects_destroyed++;
+                alSourcePlay(source[1]);
+                Sleep(30);
+                alSourceStop(source[1]);
+            }
+
+    }
+
+    void destroy() {
+        delete this;
+    }
+
 };
 
-Object ball_1, ball_2, ball_3, ball_4, ball_5, ball_6, ball_7, ball_8, ball_9, ball_10;
+//Object ball_1, ball_2, ball_3, ball_4, ball_5, ball_6, ball_7, ball_8, ball_9, ball_10;
+std::vector<Object> objects(MAX_OBJECTS);
 
 void loadHeightmap(const char* bitmap_file) {
 
@@ -298,7 +323,8 @@ void updateCam() {
     float z_pixel_float = (SIZE_Z*(((planeSize/2)+posZ)/planeSize));
     x_pixel = (int) x_pixel_float;
     z_pixel = (int) z_pixel_float;
-    float prev_pixel_influence_x, cur_pixel_influence_x, next_pixel_influence_x, prev_pixel_influence_z, cur_pixel_influence_z, next_pixel_influence_z;
+
+    /*float prev_pixel_influence_x, cur_pixel_influence_x, next_pixel_influence_x, prev_pixel_influence_z, cur_pixel_influence_z, next_pixel_influence_z;
     if ((x_pixel_float - x_pixel) >= 0.5) {
         prev_pixel_influence_x = 0;
         next_pixel_influence_x = x_pixel_float - x_pixel;
@@ -318,11 +344,12 @@ void updateCam() {
         cur_pixel_influence_z = z_pixel_float - z_pixel;
         prev_pixel_influence_z = 1 - cur_pixel_influence_z;
     }
-
+/*
     heightLimit = (heights[x_pixel-1][z_pixel]*prev_pixel_influence_x*HEIGHT_CONSTANT + heights[x_pixel][z_pixel]* cur_pixel_influence_x*HEIGHT_CONSTANT + heights[x_pixel+1][z_pixel]*next_pixel_influence_x*HEIGHT_CONSTANT
                     + heights[x_pixel][z_pixel-1]*prev_pixel_influence_z*HEIGHT_CONSTANT + heights[x_pixel][z_pixel]*cur_pixel_influence_z*HEIGHT_CONSTANT + heights[x_pixel][z_pixel+1]*next_pixel_influence_z*HEIGHT_CONSTANT)/2;
-
-    printf("%d %d - %f %f--- %f %f %f --- %f %f %f -- %f \n", x_pixel, z_pixel, x_pixel_float, z_pixel_float, prev_pixel_influence_x, cur_pixel_influence_x,next_pixel_influence_x, prev_pixel_influence_z, cur_pixel_influence_z, next_pixel_influence_z, heightLimit);
+*/
+    heightLimit = heights[x_pixel][z_pixel]*HEIGHT_CONSTANT;
+   // printf("%d %d - %f %f--- %f %f %f --- %f %f %f -- %f \n", x_pixel, z_pixel, x_pixel_float, z_pixel_float, prev_pixel_influence_x, cur_pixel_influence_x,next_pixel_influence_x, prev_pixel_influence_z, cur_pixel_influence_z, next_pixel_influence_z, heightLimit);
 
 	gluLookAt(posX,posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)),posZ,
 		posX + sin(roty*PI/180),posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180),posZ -cos(roty*PI/180),
@@ -394,7 +421,7 @@ void mainInit() {
 }
 
 void initModels() {
-
+/*
 	ball_1.initModel("ball.obj");
 	ball_1.randomlyPlaceOnWorld(1);
 
@@ -424,6 +451,11 @@ void initModels() {
 
     ball_10.initModel("ball.obj");
 	ball_10.randomlyPlaceOnWorld(9000);
+	*/
+	for(int i=0; i < MAX_OBJECTS; i++){
+        objects[i].initModel("ball.obj");
+        objects[i].randomlyPlaceOnWorld(1000*i);
+	}
 }
 
 /**
@@ -451,8 +483,12 @@ void initSound() {
         printf("init() - No errors yet.\n");
     }
 
-	alutLoadWAVFile("Footsteps.wav",&format,&data,&size,&freq,false);
+	alutLoadWAVFile("footsteps_grass.wav",&format,&data,&size,&freq,false);
     alBufferData(buffer[0],format,data,size,freq);
+    alutUnloadWAV(format, data, size, freq);
+
+    alutLoadWAVFile("beep.wav",&format,&data,&size,&freq,false);
+    alBufferData(buffer[1],format,data,size,freq);
 
 	alGetError(); /* clear error */
     alGenSources(NUM_SOURCES, source);
@@ -475,6 +511,10 @@ void initSound() {
 	source0Pos[1] = posY;
 	source0Pos[2] = posZ;
 
+    source1Pos[0] = posX;
+	source1Pos[1] = posY;
+	source1Pos[2] = posZ;
+
 	alListenerfv(AL_POSITION,listenerPos);
     alListenerfv(AL_VELOCITY,listenerVel);
     alListenerfv(AL_ORIENTATION,listenerOri);
@@ -485,6 +525,13 @@ void initSound() {
     alSourcefv(source[0], AL_VELOCITY, source0Vel);
     alSourcei(source[0], AL_BUFFER,buffer[0]);
     alSourcei(source[0], AL_LOOPING, AL_TRUE);
+
+    alSourcef(source[1], AL_PITCH, 1.0f);
+    alSourcef(source[1], AL_GAIN, 1.0f);
+    alSourcefv(source[1], AL_POSITION, source0Pos);
+    alSourcefv(source[1], AL_VELOCITY, source0Vel);
+    alSourcei(source[1], AL_BUFFER,buffer[1]);
+    alSourcei(source[1], AL_LOOPING, AL_TRUE);
 
 	printf("Sound ok! \n\n");
 }
@@ -638,17 +685,63 @@ void renderScene() {
 	cObj.Draw(SMOOTH_MATERIAL_TEXTURE); // use SMOOTH for obj files, SMOOTH_MATERIAL for obj+mtl files and SMOOTH_MATERIAL_TEXTURE for obj+mtl+tga files
 	glPopMatrix();
 */
-
+/*
+    if(ball_1.alive) {
     ball_1.move_and_draw(1);
+    ball_1.checkColisionWithPlayer();
+    }
+
+    if(ball_2.alive) {
     ball_2.move_and_draw(1000);
+    ball_2.checkColisionWithPlayer();
+    }
+
+    if(ball_3.alive) {
     ball_3.move_and_draw(2000);
+    ball_3.checkColisionWithPlayer();
+    }
+
+    if(ball_4.alive) {
     ball_4.move_and_draw(3000);
+    ball_4.checkColisionWithPlayer();
+    }
+
+    if(ball_5.alive) {
     ball_5.move_and_draw(4000);
+    ball_5.checkColisionWithPlayer();
+    }
+
+    if(ball_6.alive) {
     ball_6.move_and_draw(5000);
+    ball_6.checkColisionWithPlayer();
+    }
+
+    if(ball_7.alive) {
     ball_7.move_and_draw(6000);
+    ball_7.checkColisionWithPlayer();
+    }
+
+    if(ball_8.alive){
     ball_8.move_and_draw(7000);
+    ball_8.checkColisionWithPlayer();
+    }
+
+    if(ball_9.alive){
     ball_9.move_and_draw(8000);
+    ball_9.checkColisionWithPlayer();
+    }
+
+    if(ball_10.alive){
     ball_10.move_and_draw(9000);
+    ball_10.checkColisionWithPlayer();
+    }
+*/
+    for (int i=0; i<MAX_OBJECTS; i++) {
+        if(objects[i].alive) {
+            objects[i].move_and_draw(1000*i);
+            objects[i].checkColisionWithPlayer();
+        }
+    }
 
     // sets the bmp file already loaded to the OpenGL parameters
     setTextureToOpengl();
@@ -671,12 +764,13 @@ void updateState() {
 			speedX = 0.05 * sin(roty*PI/180);
 			speedZ = -0.05 * cos(roty*PI/180);
 		}
-
+/*
 		// efeito de "sobe e desce" ao andar
 		headPosAux += 8.5f;
 		if (headPosAux > 180.0f) {
 			headPosAux = 0.0f;
-		}
+
+		}*/
 
         if (upPressed) {
             posX += speedX;
@@ -716,15 +810,15 @@ void updateState() {
 		}
 	}
 
-	if(posX < - planeSize/2)
-        posX = -planeSize/2;
-    else if (posX > planeSize/2)
-        posX = planeSize/2;
+	if(posX < - planeSize/2.0f)
+        posX = -planeSize/2.0f;
+    else if (posX > planeSize/2.0f)
+        posX = planeSize/2.0f;
 
-    if(posZ < - planeSize/2)
-        posZ = -planeSize/2;
-    else if (posZ > planeSize/2)
-        posZ = planeSize/2;
+    if(posZ < - planeSize/2.0f)
+        posZ = -planeSize/2.0f;
+    else if (posZ > planeSize/2.0f)
+        posZ = planeSize/2.0f;
 }
 
 /**
