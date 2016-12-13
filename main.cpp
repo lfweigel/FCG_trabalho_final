@@ -31,7 +31,7 @@
 #define SMOOTH_MATERIAL 1
 #define SMOOTH_MATERIAL_TEXTURE 2
 
-#define HEIGHT_CONSTANT 10
+#define HEIGHT_CONSTANT 7
 
 //tamanho em quads do terreno. significa que só vai usar (SIZE_X)x(Size_Z) pixels do bitmal
 #define SIZE_X 300
@@ -723,8 +723,8 @@ void updateState() {
     else if (posZ > planeSize/2.0f)
         posZ = planeSize/2.0f;
 
-    total_distance += speedX;
-    total_distance += speedZ;
+    total_distance += std::abs(speedX);
+    total_distance += std::abs(speedZ);
 }
 
 /**
@@ -739,7 +739,7 @@ void mainRender() {
 	if(objects_destroyed == MAX_OBJECTS) {
         clock_t end_time = clock();
         double seconds_taken = ((double)(end_time - begin_time)/(double)CLOCKS_PER_SEC);
-        printf("%d objects destroyed in %g seconds after walking %f units!\n", MAX_OBJECTS, seconds_taken, total_distance);
+        printf("%d objects destroyed in %g seconds after walking %f units!\n", objects_destroyed, seconds_taken, total_distance);
         exit(1);
 	}
 
@@ -781,9 +781,6 @@ Mouse move while button pressed event handler
 */
 void onMouseMove(int x, int y) {
 
-    /*mouseLastX = x;
-	mouseLastY = y;*/
-    //degrees_turned += std::abs(x - mouseLastX);
 
 	glutPostRedisplay();
 }
@@ -807,7 +804,7 @@ void onMousePassiveMove(int x, int y) {
 	mouseLastX = x;
 	mouseLastY = y;
 
-    //degrees_turned += rotx;
+    //degrees_turned += std::abs(rotx);
 
 	//glutPostRedisplay();
 }
