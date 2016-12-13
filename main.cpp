@@ -121,6 +121,8 @@ float maxSpeed = 0.25f;
 
 float planeSize = 40.0f;
 
+clock_t begin_time;
+
 // more sound stuff (position, speed and orientation of the listener)
 ALfloat listenerPos[]={0.0,0.0,4.0};
 ALfloat listenerVel[]={0.0,0.0,0.0};
@@ -195,7 +197,7 @@ public:
         srand(time(NULL) + seed);
         this->x_pos = (0 - planeSize/2) + (((double)rand() / (double)RAND_MAX)*planeSize);
         this->z_pos = (0 - planeSize/2) + (((double)rand() / (double)RAND_MAX)*planeSize);
-        printf("Object generated at %f %f \n", x_pos, z_pos);
+        //printf("Object generated at %f %f \n", x_pos, z_pos);
         }
 
     void move_and_draw(int seed){
@@ -239,7 +241,7 @@ public:
         if (std::abs((this->x_pos - posX)) < COLLISION_THRESHOLD)
             if (std::abs((this->z_pos - posZ)) < COLLISION_THRESHOLD) {
                 this->alive = 0;
-                printf("ball died\n");
+                //printf("Object Killed!\n");
                 objects_destroyed++;
                 alSourcePlay(source[1]);
                 Sleep(30);
@@ -434,7 +436,7 @@ Initialize openal and check for errors
 */
 void initSound() {
 
-	printf("Initializing OpenAl \n");
+	//printf("Initializing OpenAl \n");
 
 	// Init openAL
 	alutInit(0, NULL);
@@ -451,7 +453,7 @@ void initSound() {
     }
     else
     {
-        printf("init() - No errors yet.\n");
+        //printf("init() - No errors yet.\n");
     }
 
 	alutLoadWAVFile("footsteps_grass.wav",&format,&data,&size,&freq,false);
@@ -471,7 +473,7 @@ void initSound() {
     }
     else
     {
-        printf("init - no errors after alGenSources\n");
+        //printf("init - no errors after alGenSources\n");
     }
 
 	listenerPos[0] = posX;
@@ -504,7 +506,7 @@ void initSound() {
     alSourcei(source[1], AL_BUFFER,buffer[1]);
     alSourcei(source[1], AL_LOOPING, AL_TRUE);
 
-	printf("Sound ok! \n\n");
+	//printf("Sound ok! \n\n");
 }
 
 /**
@@ -512,7 +514,7 @@ Initialize the texture using the library bitmap
 */
 void initTexture(void)
 {
-    printf ("\nLoading texture..\n");
+    //printf ("\nLoading texture..\n");
     // Load a texture object (256x256 true color)
     bits = LoadDIBitmap("grass.bmp", &info);
     if (bits == (GLubyte *)0) {
@@ -541,8 +543,8 @@ void initTexture(void)
             rgbaptr[3] = (ptr[0] + ptr[1] + ptr[2]) / 3;
     }
 
-    printf("Textura %d\n", texture);
-	printf("Textures ok.\n\n", texture);
+    //printf("Textura %d\n", texture);
+	//printf("Textures ok.\n\n", texture);
 
 }
 
@@ -638,14 +640,20 @@ void renderScene() {
 }
 
 void renderMinimap() {
-        glClear(GL_DEPTH_BUFFER_BIT);
+       glClear(GL_DEPTH_BUFFER_BIT);
         setViewport(windowWidth*0.8, windowWidth, windowHeight*0.8 , windowHeight);
         glLoadIdentity();
         gluLookAt(posX, 40 ,posZ,
         0, 0, 0,
 		-1.0,0.0,0.0);
-        renderFloor();
+       // renderFloor();
         renderObjects();
+        glPointSize(6.0);
+        glBegin(GL_POINT);
+        glColor3f(1,1,1);
+        glVertex3f(posX,30, posZ);
+        glEnd();
+
 }
 void updateState() {
 
@@ -724,7 +732,15 @@ void mainRender() {
 	glFlush();
 	glutPostRedisplay();
 	Sleep(30);
+	if(objects_destroyed == MAX_OBJECTS) {
+        clock_t end_time = clock();
+        double seconds_taken = ((double)(end_time - begin_time)/(double)CLOCKS_PER_SEC);
+        printf("%d objects destroyed in %g seconds!\n", MAX_OBJECTS, seconds_taken);
+        exit(1);
+	}
+
 }
+
 
 /**
 Handles events from the mouse right button menu
@@ -926,6 +942,7 @@ int main(int argc, char **argv) {
 
 	mainInit();
 
+    begin_time = clock();
 	glutMainLoop();
 
     return 0;
