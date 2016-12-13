@@ -725,8 +725,6 @@ void updateState() {
         posZ = -planeSize/2;
     else if (posZ > planeSize/2)
         posZ = planeSize/2;
-
-
 }
 
 /**
@@ -824,6 +822,9 @@ void onKeyDown(unsigned char key, int x, int y) {
 			upPressed = true;
 			break;
 		case 115: //s
+		    if (!downPressed){
+                alSourcePlay(source[0]);
+		    }
 			downPressed = true;
 			break;
 		case 97: //a
@@ -860,6 +861,9 @@ void onKeyUp(unsigned char key, int x, int y) {
 			upPressed = false;
 			break;
 		case 115: //s
+		    if (downPressed) {
+                alSourceStop(source[0]);
+		    }
 			downPressed = false;
 			break;
 		case 97: //a
