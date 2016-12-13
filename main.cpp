@@ -72,6 +72,8 @@ void updateState();
 void renderFloor();
 void updateCam();
 void setTextureToOpengl();
+void renderMinimap();
+void renderObjects();
 
 /**
 Screen dimensions
@@ -252,7 +254,6 @@ public:
 
 };
 
-//Object ball_1, ball_2, ball_3, ball_4, ball_5, ball_6, ball_7, ball_8, ball_9, ball_10;
 std::vector<Object> objects(MAX_OBJECTS);
 
 void loadHeightmap(const char* bitmap_file) {
@@ -398,7 +399,7 @@ void mainInit() {
 	glClearColor(1.0,1.0,1.0,0.0);
 	glColor3f(0.0f,0.0f,0.0f);
 	setWindow();
-	setViewport(0, windowWidth, 0, windowHeight);
+	setViewport(0, windowWidth*0.75f, 0, windowHeight*0.75f);
 
 	// habilita remocao de faces ocultas
 
@@ -421,37 +422,7 @@ void mainInit() {
 }
 
 void initModels() {
-/*
-	ball_1.initModel("ball.obj");
-	ball_1.randomlyPlaceOnWorld(1);
 
-    ball_2.initModel("ball.obj");
-	ball_2.randomlyPlaceOnWorld(1000);
-
-    ball_3.initModel("ball.obj");
-	ball_3.randomlyPlaceOnWorld(2000);
-
-    ball_4.initModel("ball.obj");
-	ball_4.randomlyPlaceOnWorld(3000);
-
-    ball_5.initModel("ball.obj");
-	ball_5.randomlyPlaceOnWorld(4000);
-
-    ball_6.initModel("ball.obj");
-	ball_6.randomlyPlaceOnWorld(5000);
-
-    ball_7.initModel("ball.obj");
-	ball_7.randomlyPlaceOnWorld(6000);
-
-    ball_8.initModel("ball.obj");
-	ball_8.randomlyPlaceOnWorld(7000);
-
-    ball_9.initModel("ball.obj");
-	ball_9.randomlyPlaceOnWorld(8000);
-
-    ball_10.initModel("ball.obj");
-	ball_10.randomlyPlaceOnWorld(9000);
-	*/
 	for(int i=0; i < MAX_OBJECTS; i++){
         objects[i].initModel("ball.obj");
         objects[i].randomlyPlaceOnWorld(1000*i);
@@ -569,16 +540,6 @@ void initTexture(void)
             rgbaptr[2] = ptr[0];
             rgbaptr[3] = (ptr[0] + ptr[1] + ptr[2]) / 3;
     }
-    /*
-	// Set texture parameters
-	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-    glTexImage2D(type, 0, 4, info->bmiHeader.biWidth, info->bmiHeader.biHeight,
-                  0, GL_RGBA, GL_UNSIGNED_BYTE, rgba );
-    */
 
     printf("Textura %d\n", texture);
 	printf("Textures ok.\n\n", texture);
@@ -621,27 +582,8 @@ void renderFloor() {
     int zQuads = SIZE_Z;
     for (int i = 0; i < xQuads; i++) {
         for (int j = 0; j < zQuads; j++) {
-              //glBegin(GL_TRIANGLE_STRIP);
               glBegin(GL_QUADS);
               glColor3f(heights[i][j]*HEIGHT_CONSTANT,heights[i][j]*HEIGHT_CONSTANT,heights[i][j]*HEIGHT_CONSTANT);
-              /*
-                glColor3f(heights[i][j],heights[i][j],heights[i][j]);
-                glTexCoord2f(1.0f, 0.0f);   // coords for the texture
-                glNormal3f(0.0f,1.0f,0.0f);
-                glVertex3f(i*(float)planeSize/xQuads, heights[i][j], j*(float)planeSize/zQuads);
-
-                glTexCoord2f(0.0f, 0.0f);  // coords for the texture
-                glNormal3f(0.0f,1.0f,0.0f);
-                glVertex3f((i+1)*(float)planeSize/xQuads, heights[i+1][j], j*(float)planeSize/zQuads);
-
-                glTexCoord2f(0.0f, 1.0f);  // coords for the texture
-                glNormal3f(0.0f,1.0f,0.0f);
-                glVertex3f(i* (float)planeSize/xQuads, heights[i][j+1], (j+1) * (float)planeSize/zQuads);
-
-                glTexCoord2f(1.0f, 1.0f);  // coords for the texture
-                glNormal3f(0.0f,1.0f,0.0f);
-                glVertex3f((i+1) * (float)planeSize/xQuads, heights[i+1][j+1], (j+1) * (float)planeSize/zQuads);
-                */
                 glTexCoord2f(1.0f, 1.0f);  // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f(i * (float)planeSize/xQuads, heights[i][j]*HEIGHT_CONSTANT, j * (float)planeSize/zQuads);
@@ -658,8 +600,6 @@ void renderFloor() {
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f((i+1) * (float)planeSize/xQuads, heights[i+1][j]*HEIGHT_CONSTANT, j * (float)planeSize/zQuads);
 
-
-
             glEnd();
         }
     }
@@ -670,7 +610,16 @@ void renderFloor() {
 	glPopMatrix();
 }
 
+void renderObjects(){
+    for (int i=0; i<MAX_OBJECTS; i++) {
+        if(objects[i].alive) {
+            objects[i].move_and_draw(1000*i);
+            objects[i].checkColisionWithPlayer();
+        }
+    }
+}
 void renderScene() {
+    setViewport(0, windowWidth, 0 , windowHeight);
 	glClearColor(backgrundColor[0],backgrundColor[1],backgrundColor[2],backgrundColor[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // limpar o depth buffer
 
@@ -678,81 +627,26 @@ void renderScene() {
 	glLoadIdentity();
 
 	updateCam();
-/*
-    glPushMatrix();
-    //glTranslatef(0.0,10.0,0.0);
-    glTranslatef(posX+1, heights[x_pixel][z_pixel]*HEIGHT_CONSTANT, posZ+1);
-	cObj.Draw(SMOOTH_MATERIAL_TEXTURE); // use SMOOTH for obj files, SMOOTH_MATERIAL for obj+mtl files and SMOOTH_MATERIAL_TEXTURE for obj+mtl+tga files
-	glPopMatrix();
-*/
-/*
-    if(ball_1.alive) {
-    ball_1.move_and_draw(1);
-    ball_1.checkColisionWithPlayer();
-    }
 
-    if(ball_2.alive) {
-    ball_2.move_and_draw(1000);
-    ball_2.checkColisionWithPlayer();
-    }
-
-    if(ball_3.alive) {
-    ball_3.move_and_draw(2000);
-    ball_3.checkColisionWithPlayer();
-    }
-
-    if(ball_4.alive) {
-    ball_4.move_and_draw(3000);
-    ball_4.checkColisionWithPlayer();
-    }
-
-    if(ball_5.alive) {
-    ball_5.move_and_draw(4000);
-    ball_5.checkColisionWithPlayer();
-    }
-
-    if(ball_6.alive) {
-    ball_6.move_and_draw(5000);
-    ball_6.checkColisionWithPlayer();
-    }
-
-    if(ball_7.alive) {
-    ball_7.move_and_draw(6000);
-    ball_7.checkColisionWithPlayer();
-    }
-
-    if(ball_8.alive){
-    ball_8.move_and_draw(7000);
-    ball_8.checkColisionWithPlayer();
-    }
-
-    if(ball_9.alive){
-    ball_9.move_and_draw(8000);
-    ball_9.checkColisionWithPlayer();
-    }
-
-    if(ball_10.alive){
-    ball_10.move_and_draw(9000);
-    ball_10.checkColisionWithPlayer();
-    }
-*/
-    for (int i=0; i<MAX_OBJECTS; i++) {
-        if(objects[i].alive) {
-            objects[i].move_and_draw(1000*i);
-            objects[i].checkColisionWithPlayer();
-        }
-    }
+    renderObjects();
 
     // sets the bmp file already loaded to the OpenGL parameters
     setTextureToOpengl();
 
 	renderFloor();
-	//renderHeightmap(0.1,0.4);
-
-	//modelAL.Translate(0.0f,1.0f,0.0f);
-	//modelAL.Draw();
+    renderMinimap();
 }
 
+void renderMinimap() {
+
+        setViewport(windowWidth*0.8, windowWidth, windowHeight*0.8 , windowHeight);
+        glLoadIdentity();
+        gluLookAt(posX, 40 ,posZ,
+        0, 0, 0,
+		-1.0,0.0,0.0);
+        renderFloor();
+        renderObjects();
+}
 void updateState() {
 
 	if (upPressed || downPressed) {
@@ -986,7 +880,7 @@ void onWindowReshape(int x, int y) {
 	windowWidth = x;
 	windowHeight = y;
 	setWindow();
-	setViewport(0, windowWidth, 0, windowHeight);
+	setViewport(0, windowWidth*0.75f, 0, windowHeight*0.75f);
 }
 
 /**
