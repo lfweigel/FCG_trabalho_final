@@ -739,7 +739,7 @@ void mainRender() {
 	if(objects_destroyed == MAX_OBJECTS) {
         clock_t end_time = clock();
         double seconds_taken = ((double)(end_time - begin_time)/(double)CLOCKS_PER_SEC);
-        printf("%d objects destroyed in %g seconds after walking %f units and!\n", MAX_OBJECTS, seconds_taken, total_distance);
+        printf("%d objects destroyed in %g seconds after walking %f units!\n", MAX_OBJECTS, seconds_taken, total_distance);
         exit(1);
 	}
 
