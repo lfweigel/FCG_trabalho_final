@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <time.h>
 
 #include <gl/glut.h>
 // openal (sound lib)
@@ -30,7 +31,7 @@
 #define SMOOTH_MATERIAL 1
 #define SMOOTH_MATERIAL_TEXTURE 2
 
-#define HEIGHT_CONSTANT 20
+#define HEIGHT_CONSTANT 10
 
 //tamanho em quads do terreno. significa que só vai usar (SIZE_X)x(Size_Z) pixels do bitmal
 #define SIZE_X 300
@@ -42,11 +43,14 @@ int x_pixel, z_pixel;
 // other stuff
 #define PI 3.14159265
 
+//object speed
+#define OBJECT_SPEED 0.1
+
 
 void mainInit();
 void initSound();
 void initTexture();
-void initModel();
+void initModels();
 void initLight();
 void enableFog();
 void createGLUI();
@@ -111,7 +115,7 @@ float headPosAux = 0.0f;
 
 float maxSpeed = 0.25f;
 
-float planeSize = 100.0f;
+float planeSize = 40.0f;
 
 // more sound stuff (position, speed and orientation of the listener)
 ALfloat listenerPos[]={0.0,0.0,4.0};
@@ -164,6 +168,68 @@ C3DObject cObj;
 std::vector<std::vector<float> > heights;
 
 //Armazena os valores do heightmap na matriz declarada acima
+
+
+///////////////////////refatoracao pls
+
+class Object{
+public:
+    float x_pos, z_pos;
+    C3DObject cObj;
+
+    void initModel(const char* model) {
+	cObj.Init();
+	cObj.Load(model);
+    }
+
+    void randomlyPlaceOnWorld(int seed) {
+
+        srand(time(NULL) + seed);
+        this->x_pos = (0 - planeSize/2) + (((double)rand() / (double)RAND_MAX)*planeSize);
+        this->z_pos = (0 - planeSize/2) + (((double)rand() / (double)RAND_MAX)*planeSize);
+        printf("Object generated at %f %f \n", x_pos, z_pos);
+        }
+
+    void move_and_draw(int seed){
+        srand(time(NULL) + seed);
+        int side = rand()%5;
+        switch (side){
+            case 0: this->x_pos -= OBJECT_SPEED;
+            break;
+            case 1: this->x_pos += OBJECT_SPEED;
+            break;
+            case 2: this->z_pos -= OBJECT_SPEED;
+            break;
+            case 3: this ->z_pos += OBJECT_SPEED;
+            break;
+            case 4:
+            default: break;
+        }
+
+        if (this->x_pos < -planeSize/2)
+            this->x_pos = -planeSize/2;
+        else if (this->x_pos > planeSize/2)
+            this->x_pos = planeSize/2;
+
+        if (this->z_pos < -planeSize/2)
+            this->z_pos = -planeSize/2;
+        else if (this->z_pos > planeSize/2)
+            this->z_pos = planeSize/2;
+
+        glPushMatrix();
+        float x_pixel_float = (SIZE_X*(((planeSize/2)+x_pos)/planeSize));
+        float z_pixel_float = (SIZE_Z*(((planeSize/2)+z_pos)/planeSize));
+        x_pixel = (int) x_pixel_float;
+        z_pixel = (int) z_pixel_float;
+        glTranslatef(x_pos, (heights[x_pixel][z_pixel]*HEIGHT_CONSTANT)+1.0, z_pos);
+        cObj.Draw(SMOOTH_MATERIAL_TEXTURE); // use SMOOTH for obj files, SMOOTH_MATERIAL for obj+mtl files and SMOOTH_MATERIAL_TEXTURE for obj+mtl+tga files
+        glPopMatrix();
+    }
+
+};
+
+Object ball_1, ball_2, ball_3, ball_4, ball_5, ball_6, ball_7, ball_8, ball_9, ball_10;
+
 void loadHeightmap(const char* bitmap_file) {
 
     SDL_Surface* loaded_bitmap = SDL_LoadBMP(bitmap_file);
@@ -320,20 +386,44 @@ void mainInit() {
 
     initTexture();
 
-	initModel();
+	initModels();
 
 	initLight();
 
     loadHeightmap("heightmap.bmp");
 }
 
-void initModel() {
-	printf("Loading models.. \n");
-	cObj.Init();
-	cObj.Load("ball.obj");
-	//modelAL = CModelAl();
-	//modelAL.Init();
-	printf("Models ok. \n \n \n");
+void initModels() {
+
+	ball_1.initModel("ball.obj");
+	ball_1.randomlyPlaceOnWorld(1);
+
+    ball_2.initModel("ball.obj");
+	ball_2.randomlyPlaceOnWorld(1000);
+
+    ball_3.initModel("ball.obj");
+	ball_3.randomlyPlaceOnWorld(2000);
+
+    ball_4.initModel("ball.obj");
+	ball_4.randomlyPlaceOnWorld(3000);
+
+    ball_5.initModel("ball.obj");
+	ball_5.randomlyPlaceOnWorld(4000);
+
+    ball_6.initModel("ball.obj");
+	ball_6.randomlyPlaceOnWorld(5000);
+
+    ball_7.initModel("ball.obj");
+	ball_7.randomlyPlaceOnWorld(6000);
+
+    ball_8.initModel("ball.obj");
+	ball_8.randomlyPlaceOnWorld(7000);
+
+    ball_9.initModel("ball.obj");
+	ball_9.randomlyPlaceOnWorld(8000);
+
+    ball_10.initModel("ball.obj");
+	ball_10.randomlyPlaceOnWorld(9000);
 }
 
 /**
@@ -543,10 +633,22 @@ void renderScene() {
 	updateCam();
 /*
     glPushMatrix();
-    glTranslatef(0.0,1.0,0.0);
+    //glTranslatef(0.0,10.0,0.0);
+    glTranslatef(posX+1, heights[x_pixel][z_pixel]*HEIGHT_CONSTANT, posZ+1);
 	cObj.Draw(SMOOTH_MATERIAL_TEXTURE); // use SMOOTH for obj files, SMOOTH_MATERIAL for obj+mtl files and SMOOTH_MATERIAL_TEXTURE for obj+mtl+tga files
 	glPopMatrix();
-	*/
+*/
+
+    ball_1.move_and_draw(1);
+    ball_2.move_and_draw(1000);
+    ball_3.move_and_draw(2000);
+    ball_4.move_and_draw(3000);
+    ball_5.move_and_draw(4000);
+    ball_6.move_and_draw(5000);
+    ball_7.move_and_draw(6000);
+    ball_8.move_and_draw(7000);
+    ball_9.move_and_draw(8000);
+    ball_10.move_and_draw(9000);
 
     // sets the bmp file already loaded to the OpenGL parameters
     setTextureToOpengl();
