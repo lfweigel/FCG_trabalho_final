@@ -121,8 +121,6 @@ float maxSpeed = 0.25f;
 
 float planeSize = 40.0f;
 
-clock_t begin_time;
-
 // more sound stuff (position, speed and orientation of the listener)
 ALfloat listenerPos[]={0.0,0.0,4.0};
 ALfloat listenerVel[]={0.0,0.0,0.0};
@@ -171,6 +169,9 @@ float backgrundColor[4] = {0.0f,206.0f,209.0f,1.0f};
 C3DObject cObj;
 
 int objects_destroyed = 0;
+float total_distance = 0;
+clock_t begin_time;
+float degrees_turned = 0;
 
 //CModelAl modelAL;
 
@@ -721,6 +722,9 @@ void updateState() {
         posZ = -planeSize/2.0f;
     else if (posZ > planeSize/2.0f)
         posZ = planeSize/2.0f;
+
+    total_distance += speedX;
+    total_distance += speedZ;
 }
 
 /**
@@ -735,7 +739,7 @@ void mainRender() {
 	if(objects_destroyed == MAX_OBJECTS) {
         clock_t end_time = clock();
         double seconds_taken = ((double)(end_time - begin_time)/(double)CLOCKS_PER_SEC);
-        printf("%d objects destroyed in %g seconds!\n", MAX_OBJECTS, seconds_taken);
+        printf("%d objects destroyed in %g seconds after walking %f units and!\n", MAX_OBJECTS, seconds_taken, total_distance);
         exit(1);
 	}
 
@@ -777,8 +781,9 @@ Mouse move while button pressed event handler
 */
 void onMouseMove(int x, int y) {
 
-	/*mouseLastX = x;
+    /*mouseLastX = x;
 	mouseLastY = y;*/
+    //degrees_turned += std::abs(x - mouseLastX);
 
 	glutPostRedisplay();
 }
@@ -799,9 +804,10 @@ void onMousePassiveMove(int x, int y) {
 	if (rotx > -45.0) {
 		rotx = -45.0;
 	}
-
 	mouseLastX = x;
 	mouseLastY = y;
+
+    //degrees_turned += rotx;
 
 	//glutPostRedisplay();
 }
