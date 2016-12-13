@@ -1,54 +1,47 @@
-
 #define GLUT_NO_LIB_PRAGMA
 #define GLUT_NO_WARNING_DISABLE
 
 #include <windows.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <cmath>
 #include <iostream>
-#include <gl/glut.h>
 #include <vector>
 
-//openal (sound lib)
+#include <gl/glut.h>
+// openal (sound lib)
 #include <al/alut.h>
-
-//bitmap class to load bitmaps for textures
+// bitmap class to load bitmaps for textures
 #include "bitmap.h"
-
-//handle for the al.obj model
+// handle for the al.obj model
 //#include "ModelAl.h"
-
-//handle generic obj models
+// handle generic obj models
 #include "3DObject.h"
-
-//lib pra fazer as treta do heightmap
+// lib pra fazer as treta do heightmap
 #include <SDL/SDL.h>
-
-
-#pragma comment(lib, "OpenAL32.lib")
-#pragma comment(lib, "alut.lib")
-
-#define PI 3.14159265
 
 // sound stuff
 #define NUM_BUFFERS 1
 #define NUM_SOURCES 1
 #define NUM_ENVIRONMENTS 1
-
+// texture stuff
 #define SMOOTH 0
 #define SMOOTH_MATERIAL 1
 #define SMOOTH_MATERIAL_TEXTURE 2
 
 #define HEIGHT_CONSTANT 20
+
 //tamanho em quads do terreno. significa que só vai usar (SIZE_X)x(Size_Z) pixels do bitmal
 #define SIZE_X 300
 #define SIZE_Z 300
 
 //current position on the bitmap to calculate correct y-position of the player
 int x_pixel, z_pixel;
+
+// other stuff
+#define PI 3.14159265
+
 
 void mainInit();
 void initSound();
@@ -193,11 +186,15 @@ void loadHeightmap(const char* bitmap_file) {
 }
 /*
 void renderHeightmap(float size, float height){
+
     glShadeModel(GL_SMOOTH);
 	glEnable(type);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
 	glPushMatrix();
+
     glTranslatef(-(float)planeSize/2.0f, 0.0f, -(float)planeSize/2.0f);
+
     for (int i=0; i<heights.size()-1;i++) {
         for (int j=0; j<heights[i].size()-1; j++) {
             glBegin(GL_TRIANGLE_STRIP);
@@ -417,6 +414,7 @@ void initTexture(void)
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
     glTexImage2D(type, 0, 4, info->bmiHeader.biWidth, info->bmiHeader.biHeight,
                   0, GL_RGBA, GL_UNSIGNED_BYTE, rgba );
     */
@@ -470,12 +468,15 @@ void renderFloor() {
                 glTexCoord2f(1.0f, 0.0f);   // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f(i*(float)planeSize/xQuads, heights[i][j], j*(float)planeSize/zQuads);
+
                 glTexCoord2f(0.0f, 0.0f);  // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f((i+1)*(float)planeSize/xQuads, heights[i+1][j], j*(float)planeSize/zQuads);
+
                 glTexCoord2f(0.0f, 1.0f);  // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f(i* (float)planeSize/xQuads, heights[i][j+1], (j+1) * (float)planeSize/zQuads);
+
                 glTexCoord2f(1.0f, 1.0f);  // coords for the texture
                 glNormal3f(0.0f,1.0f,0.0f);
                 glVertex3f((i+1) * (float)planeSize/xQuads, heights[i+1][j+1], (j+1) * (float)planeSize/zQuads);
