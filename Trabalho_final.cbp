@@ -17,13 +17,17 @@
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
+					<Add option="-lmingw32 -lSDLmain -lSDL -mwindows" />
 					<Add library="lib\alut.lib" />
 					<Add library="lib\EFX-Util.lib" />
 					<Add library="lib\GlU32.Lib" />
 					<Add library="lib\glut32.lib" />
 					<Add library="lib\OpenAL32.lib" />
 					<Add library="lib\OpenGL32.Lib" />
-					<Add directory="include" />
+					<Add library="lib\libSDLmain.a" />
+					<Add library="lib\libSDL.a" />
+					<Add library="lib\libSDL.dll.a" />
+					<Add directory="lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">

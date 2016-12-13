@@ -177,7 +177,7 @@ void loadHeightmap(const char* bitmap_file) {
             Uint32 pixel = ((Uint32*)loaded_bitmap->pixels)[i*loaded_bitmap->pitch/4 + j];
             Uint8 r, g, b;
             SDL_GetRGB(pixel, loaded_bitmap->format, &r, &g, &b);
-            current_row.push_back((float)(r+g+b/3)/255.0);
+            current_row.push_back((float)((r+g+b)/3)/255.0);
         }
         heights.push_back(current_row);
     }
@@ -226,8 +226,10 @@ void setWindow() {
 Atualiza a posição e orientação da camera
 */
 void updateCam() {
-
-
+/*
+    heightLimit = heights[(int)(255*posX/planeSize)][(int)(255*posZ/planeSize)]*HEIGHT_CONSTANT;
+    printf("%f %f %f --- %f\n", posX, posY, posZ, heightLimit);
+*/
 	gluLookAt(posX,posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)),posZ,
 		posX + sin(roty*PI/180),posY + posYOffset + 0.025 * std::abs(sin(headPosAux*PI/180)) + cos(rotx*PI/180),posZ -cos(roty*PI/180),
 		0.0,1.0,0.0);
