@@ -1,44 +1,36 @@
-#include <windows.h>
+#define GLUT_NO_LIB_PRAGMA
+#define GLUT_NO_WARNING_DISABLE
 
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <cmath>
 #include <iostream>
-#include <gl/glut.h>
 #include <vector>
 
-//openal (sound lib)
+#include <gl/glut.h>
+// openal (sound lib)
 #include <al/alut.h>
-
-//bitmap class to load bitmaps for textures
+// bitmap class to load bitmaps for textures
 #include "bitmap.h"
-
-//handle for the al.obj model
+// handle for the al.obj model
 //#include "ModelAl.h"
-
-//handle generic obj models
+// handle generic obj models
 #include "3DObject.h"
-
-#define SDL_MAIN_HANDLED
-
-//lib pra fazer as treta do heightmap
+// lib pra fazer as treta do heightmap
 #include <SDL/SDL.h>
-
-#pragma comment(lib, "OpenAL32.lib")
-#pragma comment(lib, "alut.lib")
-
-#define PI 3.14159265
 
 // sound stuff
 #define NUM_BUFFERS 1
 #define NUM_SOURCES 1
 #define NUM_ENVIRONMENTS 1
-
+// texture stuff
 #define SMOOTH 0
 #define SMOOTH_MATERIAL 1
 #define SMOOTH_MATERIAL_TEXTURE 2
-
+// other stuff
+#define PI 3.14159265
 #define HEIGHT_CONSTANT 7
 
 void mainInit();
